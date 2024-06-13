@@ -47,7 +47,7 @@ def pass_args():
     code.k = args.code_k
     code.n = args.code_n
     code.code_type = args.code_type
-    G, H = Get_Generator_and_Parity(code, standard_form=args.standardize)
+    # G, H = Get_Generator_and_Parity(code, standard_form=args.standardize)
     code.generator_matrix = None #torch.from_numpy(G).transpose(0, 1).long()
     code.pc_matrix = None #torch.from_numpy(H).long()
     args.code = code
