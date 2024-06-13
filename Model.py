@@ -117,7 +117,7 @@ class ECC_Transformer(nn.Module):
             args.d_model, c(attn), c(ff), dropout), args.N_dec)
         self.oned_final_embed = torch.nn.Sequential(
             *[nn.Linear(args.d_model, 1)])
-        self.out_fc = nn.Linear(code.n + code.pc_matrix.size(0), code.n)
+        self.out_fc = nn.Linear(encoder._n + encoder.pcm.shape[0], encoder._n)
 
         self.get_mask(code)
         logging.info(f'Mask:\n {self.src_mask}')
@@ -144,7 +144,7 @@ class ECC_Transformer(nn.Module):
             return
 
         def build_mask(code):
-            mask_size = code.n + code.pc_matrix.size(0)
+            mask_size = encoder._n +encoder.pcm.shape[0]
             mask = torch.eye(mask_size, mask_size)
             for ii in range(code.pc_matrix.size(0)):
                 idx = torch.where(code.pc_matrix[ii] > 0)[0]
@@ -153,12 +153,12 @@ class ECC_Transformer(nn.Module):
                         if jj != kk:
                             mask[jj, kk] += 1
                             mask[kk, jj] += 1
-                            mask[code.n + ii, jj] += 1
-                            mask[jj, code.n + ii] += 1
+                            mask[encoder._n + ii, jj] += 1
+                            mask[jj, encoder._n + ii] += 1
             src_mask = ~ (mask > 0).unsqueeze(0).unsqueeze(0)
             return src_mask
         src_mask = build_mask(code)
-        mask_size = code.n + code.pc_matrix.size(0)
+        mask_size = encoder._n +encoder.pcm.shape[0]
         a = mask_size ** 2
         logging.info(
             f'Self-Attention Sparsity Ratio={100 * torch.sum((src_mask).int()) / a:0.2f}%, Self-Attention Complexity Ratio={100 * torch.sum((~src_mask).int())//2 / a:0.2f}%')
