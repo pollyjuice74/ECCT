@@ -112,6 +112,10 @@ class ECC_Transformer(nn.Module):
         attn = MultiHeadedAttention(args.h, args.d_model)
         ff = PositionwiseFeedForward(args.d_model, args.d_model*4, dropout)
 
+        # 5G Compliant encoder/decoder
+        self.encoder5G = encoder
+        self.decoder5G = decoder
+
         self.src_embed = torch.nn.Parameter(torch.empty(encoder._n + encoder.pcm.shape[0], args.d_model)) #(code.n + code.pc_matrix.size(0), args.d_model)))
         self.decoder = Encoder(EncoderLayer(
             args.d_model, c(attn), c(ff), dropout), args.N_dec)
@@ -143,7 +147,7 @@ class ECC_Transformer(nn.Module):
             self.src_mask = None
             return
 
-        def build_mask(code):
+        def build_mask(code, encoder):
             mask_size = encoder._n +encoder.pcm.shape[0]
             mask = torch.eye(mask_size, mask_size)
             for ii in range(code.pc_matrix.size(0)):
@@ -157,7 +161,7 @@ class ECC_Transformer(nn.Module):
                             mask[jj, encoder._n + ii] += 1
             src_mask = ~ (mask > 0).unsqueeze(0).unsqueeze(0)
             return src_mask
-        src_mask = build_mask(code)
+        src_mask = build_mask(code, encoder)
         mask_size = encoder._n +encoder.pcm.shape[0]
         a = mask_size ** 2
         logging.info(
