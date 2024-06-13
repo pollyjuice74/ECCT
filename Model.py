@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import math
 import copy
 import logging
-from Codes import sign_to_bin
+from ECCT.Codes import sign_to_bin
 
 
 def clones(module, N):
