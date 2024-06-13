@@ -116,12 +116,12 @@ class ECC_Transformer(nn.Module):
         self.encoder5G = encoder
         self.decoder5G = decoder
 
-        self.src_embed = torch.nn.Parameter(torch.empty(encoder._n + encoder.pcm.shape[0], args.d_model)) #(code.n + code.pc_matrix.size(0), args.d_model)))
+        self.src_embed = torch.nn.Parameter(torch.empty(self.encoder5G._n + self.encoder5G.pcm.shape[0], args.d_model)) #(code.n + code.pc_matrix.size(0), args.d_model)))
         self.decoder = Encoder(EncoderLayer(
             args.d_model, c(attn), c(ff), dropout), args.N_dec)
         self.oned_final_embed = torch.nn.Sequential(
             *[nn.Linear(args.d_model, 1)])
-        self.out_fc = nn.Linear(encoder._n + encoder.pcm.shape[0], encoder._n)
+        self.out_fc = nn.Linear(self.encoder5G._n + self.encoder5G.pcm.shape[0], self.encoder5G._n)
 
         self.get_mask(code)
         logging.info(f'Mask:\n {self.src_mask}')
@@ -148,21 +148,21 @@ class ECC_Transformer(nn.Module):
             return
 
         def build_mask(code, encoder):
-            mask_size = encoder._n +encoder.pcm.shape[0]
+            mask_size = self.encoder5G._n +self.encoder5G.pcm.shape[0]
             mask = torch.eye(mask_size, mask_size)
-            for ii in range(encoder.pcm.shape[0]):
-                idx = torch.where(encoder.pcm[ii] > 0)[0] #code.pc_matrix[ii]
+            for ii in range(self.encoder5G.pcm.shape[0]):
+                idx = torch.where(self.encoder5G.pcm[ii] > 0)[0] #code.pc_matrix[ii]
                 for jj in idx:
                     for kk in idx:
                         if jj != kk:
                             mask[jj, kk] += 1
                             mask[kk, jj] += 1
-                            mask[encoder._n + ii, jj] += 1
-                            mask[jj, encoder._n + ii] += 1
+                            mask[self.encoder5G._n + ii, jj] += 1
+                            mask[jj, self.encoder5G._n + ii] += 1
             src_mask = ~ (mask > 0).unsqueeze(0).unsqueeze(0)
             return src_mask
-        src_mask = build_mask(code, encoder)
-        mask_size = encoder._n +encoder.pcm.shape[0]
+        src_mask = build_mask(code, self.encoder5G)
+        mask_size = self.encoder5G._n +self.encoder5G.pcm.shape[0]
         a = mask_size ** 2
         logging.info(
             f'Self-Attention Sparsity Ratio={100 * torch.sum((src_mask).int()) / a:0.2f}%, Self-Attention Complexity Ratio={100 * torch.sum((~src_mask).int())//2 / a:0.2f}%')
