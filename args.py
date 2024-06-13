@@ -1,4 +1,5 @@
 import argparse
+from  ECCT.Main import set_seed
 
 parser = argparse.ArgumentParser(description='PyTorch ECCT')
 parser.add_argument('--epochs', type=int, default=1000)
@@ -55,3 +56,5 @@ logging.info(args)
 
 main(args)
 
+# 
+pass_args = lamnda x: args
