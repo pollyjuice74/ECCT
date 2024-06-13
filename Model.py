@@ -112,7 +112,7 @@ class ECC_Transformer(nn.Module):
         attn = MultiHeadedAttention(args.h, args.d_model)
         ff = PositionwiseFeedForward(args.d_model, args.d_model*4, dropout)
 
-        self.src_embed = torch.nn.Parameter(torch.empty(encoder._n + encoder.pcm.shape[0], args.d_model))) #(code.n + code.pc_matrix.size(0), args.d_model)))
+        self.src_embed = torch.nn.Parameter(torch.empty(encoder._n + encoder.pcm.shape[0], args.d_model)) #(code.n + code.pc_matrix.size(0), args.d_model)))
         self.decoder = Encoder(EncoderLayer(
             args.d_model, c(attn), c(ff), dropout), args.N_dec)
         self.oned_final_embed = torch.nn.Sequential(
