@@ -48,8 +48,8 @@ def pass_args():
     code.n = args.code_n
     code.code_type = args.code_type
     G, H = Get_Generator_and_Parity(code, standard_form=args.standardize)
-    code.generator_matrix = torch.from_numpy(G).transpose(0, 1).long()
-    code.pc_matrix = torch.from_numpy(H).long()
+    code.generator_matrix = None #torch.from_numpy(G).transpose(0, 1).long()
+    code.pc_matrix = None #torch.from_numpy(H).long()
     args.code = code
 
     model_dir = os.path.join('Results_ECCT', f"{args.code_type}__Code_n_{args.code_n}_k_{args.code_k}__{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}")
