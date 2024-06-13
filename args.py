@@ -57,4 +57,5 @@ logging.info(args)
 main(args)
 
 # 
-pass_args = lamnda x: args
+def pass_args():
+  return args
