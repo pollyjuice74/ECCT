@@ -150,8 +150,8 @@ class ECC_Transformer(nn.Module):
         def build_mask(code, encoder):
             mask_size = encoder._n +encoder.pcm.shape[0]
             mask = torch.eye(mask_size, mask_size)
-            for ii in range(code.pc_matrix.size(0)):
-                idx = torch.where(code.pc_matrix[ii] > 0)[0]
+            for ii in range(encoder.pcm.shape[0]):
+                idx = torch.where(encoder.pcm[ii] > 0)[0] #code.pc_matrix[ii]
                 for jj in idx:
                     for kk in idx:
                         if jj != kk:
