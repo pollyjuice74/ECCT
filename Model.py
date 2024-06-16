@@ -124,7 +124,7 @@ class ECC_Transformer(nn.Module):
         self.out_fc = nn.Linear(self.encoder5G._n + self.encoder5G.pcm.shape[0], self.encoder5G._n)
 
         self.get_mask(code)
-        logging.info(f'Mask:\n {self.src_mask}')
+        print(f'Mask:\n {self.src_mask}')
         ###
         for p in self.parameters():
             if p.dim() > 1:
@@ -164,7 +164,7 @@ class ECC_Transformer(nn.Module):
         src_mask = build_mask(code, self.encoder5G)
         mask_size = self.encoder5G._n +self.encoder5G.pcm.shape[0]
         a = mask_size ** 2
-        logging.info(
+        print(
             f'Self-Attention Sparsity Ratio={100 * torch.sum((src_mask).int()) / a:0.2f}%, Self-Attention Complexity Ratio={100 * torch.sum((~src_mask).int())//2 / a:0.2f}%')
         self.register_buffer('src_mask', src_mask)
 
