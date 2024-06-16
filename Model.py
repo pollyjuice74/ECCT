@@ -102,12 +102,11 @@ class PositionwiseFeedForward(nn.Module):
 
 ############################################################
 
-
 class ECC_Transformer(nn.Module):
     def __init__(self, args, encoder, decoder, dropout=0):
         super(ECC_Transformer, self).__init__()
         ####
-        code = args.code
+        # code = args.code
         c = copy.deepcopy
         attn = MultiHeadedAttention(args.h, args.d_model)
         ff = PositionwiseFeedForward(args.d_model, args.d_model*4, dropout)
@@ -123,12 +122,13 @@ class ECC_Transformer(nn.Module):
             *[nn.Linear(args.d_model, 1)])
         self.out_fc = nn.Linear(self.encoder5G._n_ldpc + self.encoder5G.pcm.shape[0], self.encoder5G._n_ldpc) ###
 
-        self.get_mask(code)
+        self.get_mask()
         print(f'Mask:\n {self.src_mask}')
 
         for p in self.parameters():
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
+
 
     def forward(self, magnitude, syndrome):
         emb = torch.cat([magnitude, syndrome], -1).unsqueeze(-1)
@@ -136,19 +136,15 @@ class ECC_Transformer(nn.Module):
         emb = self.decoder(emb, self.src_mask)
         return self.out_fc(self.oned_final_embed(emb).squeeze(-1))
 
+
     def loss(self, z_pred, z2, y):
         loss = F.binary_cross_entropy_with_logits(
             z_pred, sign_to_bin(torch.sign(z2)))
         x_pred = sign_to_bin(torch.sign(-z_pred * torch.sign(y)))
         return loss, x_pred
 
-    def get_mask(self, code, no_mask=False):
-        if no_mask:
-            self.src_mask = None
-            return
 
-        def build_mask(code, encoder):
-            mask_size = self.encoder5G._n_ldpc +self.encoder5G.pcm.shape[0] # n + m
+    def build_mask(self, mask_size):
             mask = torch.eye(mask_size, mask_size)
 
             for ii in range(self.encoder5G.pcm.shape[0]): # m
@@ -166,20 +162,29 @@ class ECC_Transformer(nn.Module):
                         if jj != kk:
                             mask[jj, kk] += 1
                             mask[kk, jj] += 1
-                            mask[self.encoder5G._n + ii, jj] += 1
-                            mask[jj, self.encoder5G._n + ii] += 1
+                            mask[self.encoder5G._n_ldpc + ii, jj] += 1
+                            mask[jj, self.encoder5G._n_ldpc + ii] += 1
 
             src_mask = ~ (mask > 0).unsqueeze(0).unsqueeze(0)
             return src_mask
 
-        src_mask = build_mask(code, self.encoder5G)
-        print(src_mask)
 
-        mask_size = self.encoder5G._n_ldpc +self.encoder5G.pcm.shape[0]
+    def get_mask(self, no_mask=False):
+        if no_mask:
+            self.src_mask = None
+            return
+
+        mask_size = self.encoder5G._n_ldpc +self.encoder5G.pcm.shape[0] # n + m
+        src_mask = self.build_mask(mask_size)
+        print(src_mask, mask_size)
+
         a = mask_size ** 2
+        print(a, )
+
         print(
             f'Self-Attention Sparsity Ratio={100 * torch.sum((src_mask).int()) / a:0.2f}%, Self-Attention Complexity Ratio={100 * torch.sum((~src_mask).int())//2 / a:0.2f}%')
         self.register_buffer('src_mask', src_mask)
+
 
 
 ############################################################
