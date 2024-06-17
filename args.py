@@ -6,10 +6,6 @@ import torch
 import logging
 from datetime import datetime
 
-def set_seed(seed):
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
 
 def pass_args():
     parser = argparse.ArgumentParser(description='PyTorch ECCT')
