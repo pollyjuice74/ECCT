@@ -57,8 +57,8 @@ def pass_args():
     args.path = model_dir
     handlers = [logging.FileHandler(os.path.join(model_dir, 'logging.txt'))]
     handlers += [logging.StreamHandler()]
-    logging.basicConfig(level=logging.INFO, format='%(message)s', handlers=handlers)
-    logging.info(f"Path to model/logs: {model_dir}")
-    logging.info(args)
+    logging.basicConfig(level=print, format='%(message)s', handlers=handlers)
+    print(f"Path to model/logs: {model_dir}")
+    print(args)
 
     return args
