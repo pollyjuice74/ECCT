@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 
 
-def pass_args():
+def pass_args_ecct():
     parser = argparse.ArgumentParser(description='PyTorch ECCT')
     parser.add_argument('--epochs', type=int, default=1000)
     parser.add_argument('--workers', type=int, default=4)
