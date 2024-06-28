@@ -102,9 +102,8 @@ class PositionwiseFeedForward(nn.Module):
 
 ############################################################
 
-
 class ECC_Transformer(nn.Module):
-    def __init__(self, args, encoder, decoder, dropout=0):
+    def __init__(self, args, encoder, dropout=0):
         super(ECC_Transformer, self).__init__()
         ####
         # code = args.code
@@ -114,7 +113,6 @@ class ECC_Transformer(nn.Module):
 
         # 5G Compliant encoder/decoder
         self.encoder5G = encoder
-        self.decoder5G = decoder
 
         self.src_embed = torch.nn.Parameter(torch.empty(self.encoder5G._n_ldpc + self.encoder5G.pcm.shape[0], args.d_model)) ### #(code.n + code.pc_matrix.size(0), args.d_model)))
 
